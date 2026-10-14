@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Precentor</title>
+<style>
+:root{--bg:#e9e7e2;--panel:#f3f1ec;--ink:#1d1d1b;--mute:#8a8780;--acc:#e4501b;--key:#dcd9d2;--line:#cfccc4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1c1b;--panel:#262625;--ink:#ecebe7;--mute:#85827b;--key:#363634;--line:#3a3a38}}
+:root[data-theme="dark"]{--bg:#1c1c1b;--panel:#262625;--ink:#ecebe7;--mute:#85827b;--key:#363634;--line:#3a3a38}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 "Helvetica Neue",Helvetica,Arial,sans-serif;min-height:100%;display:flex;justify-content:center;padding:28px 16px;-webkit-user-select:none;user-select:none}
+main{width:100%;max-width:900px}
+header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+h1{font-size:15px;font-weight:700;letter-spacing:.22em;margin:0}
+.sub{color:var(--mute);font-size:11px;letter-spacing:.04em}
+.panel{background:var(--panel);border-radius:6px;padding:26px 22px;border:1px solid var(--line)}
+.trad{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.ctl{display:block}
+@media (max-width:760px){.trad{grid-template-columns:repeat(4,1fr)}.ctl{grid-template-columns:1fr}}
+.t{background:var(--key);border:0;border-radius:4px;padding:10px 2px;color:var(--mute);font:600 10px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.t[aria-pressed=true]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
+@media (max-width:380px){.t{font-size:8.5px;letter-spacing:.04em}}
+.t,.key,.row{position:relative}
+.t[data-tip]::after,.key[data-tip]::after,.row[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:max-content;max-width:min(260px,80vw);background:var(--ink);color:var(--panel);padding:10px 12px;border-radius:4px;font:400 11px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.02em;text-transform:none;text-align:left;white-space:pre-line;opacity:0;pointer-events:none;transition:opacity .2s;z-index:6}
+.t[data-tip]:hover::after,.key[data-tip]:hover::after,.row[data-tip]:hover::after{opacity:1;transition-delay:.35s}
+.row[data-tip]::after{left:90px;transform:none;bottom:calc(100% - 2px)}
+.t:nth-child(7n+1)::after,.t:nth-child(7n+2)::after{left:0;transform:none}
+.t:nth-child(7n)::after,.t:nth-child(7n+6)::after{left:auto;right:0;transform:none}
+@media (max-width:760px){.t:nth-child(n)::after{left:50%;right:auto;transform:translateX(-50%)}.t:nth-child(4n+1)::after,.t:nth-child(4n+2)::after{left:0;transform:none}.t:nth-child(4n)::after,.t:nth-child(4n+3)::after{left:auto;right:0;transform:none}}
+#cap{color:var(--mute);font-size:11px;min-height:32px;margin:0 0 20px;letter-spacing:.02em}
+.keys{display:flex;justify-content:space-between;gap:8px;margin-bottom:30px}
+.key{flex:1;aspect-ratio:1;max-width:84px;border-radius:50%;border:0;background:var(--key);color:var(--mute);font:600 11px "Helvetica Neue",Helvetica,Arial,sans-serif;cursor:pointer;touch-action:none;position:relative;transition:box-shadow .5s,color .3s}
+.key.on{box-shadow:inset 0 0 0 3px var(--acc);color:var(--ink);transition:box-shadow .05s}
+.row{display:grid;grid-template-columns:90px 1fr;align-items:center;gap:14px;margin:18px 0}
+.row label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--ink)}
+input[type=range]::-moz-range-track{height:2px;background:var(--ink)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--key);border:1px solid var(--mute);margin-top:-9px;box-shadow:inset 0 0 0 7px var(--key),inset 0 0 0 8px var(--acc)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--key);border:1px solid var(--mute)}
+.scale{display:flex;justify-content:space-between;font-size:9px;color:var(--mute);letter-spacing:.1em;margin-top:-2px}
+.sw{display:flex;gap:10px;margin-top:26px;border-top:1px solid var(--line);padding-top:22px}
+.sw button{flex:1;background:var(--key);border:0;border-radius:4px;padding:12px;color:var(--ink);font:600 10px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:10px}
+.sw button{position:relative}
+.sw button::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 10px);left:0;width:min(250px,72vw);background:var(--ink);color:var(--panel);padding:10px 12px;border-radius:4px;font:400 11px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.02em;text-transform:none;text-align:left;white-space:normal;opacity:0;pointer-events:none;transition:opacity .2s;z-index:5}
+.sw button:hover::after,.sw button:focus-visible::after{opacity:1;transition-delay:.35s}
+#drift::after,#rec::after{left:auto;right:0}
+.tri{display:flex;gap:8px}.tri>*{flex:1;min-width:0}
+input[type=number],input[type=text]{width:100%;background:var(--key);color:var(--ink);border:0;border-radius:4px;padding:9px 8px;font:12px "Helvetica Neue",Helvetica,Arial,sans-serif}
+button.mini{background:var(--key);color:var(--ink);border:0;border-radius:4px;font:600 10px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.sw i{width:7px;height:7px;border-radius:50%;background:var(--mute);display:block}
+.sw button[aria-pressed=true] i{background:var(--acc)}
+.midi{border-top:1px solid var(--line);margin-top:22px;padding-top:14px}
+.midi summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+.midi summary::-webkit-details-marker{display:none}
+.midi summary::before{content:"+";font-size:14px;font-weight:400;width:16px;color:var(--acc)}
+.midi[open] summary::before{content:"\2212"}
+.midi summary span{margin-left:auto}
+.midi>.row:first-of-type{margin-top:20px}
+select{width:100%;background:var(--key);color:var(--ink);border:0;border-radius:4px;padding:9px 8px;font:12px "Helvetica Neue",Helvetica,Arial,sans-serif}
+
+.sw.m{margin-top:8px;padding-top:0;border:0}
+#ms{color:var(--mute);font-size:11px;letter-spacing:.04em}
+.note{color:var(--mute);font-size:11px;margin-top:16px;letter-spacing:.03em}
+</style></head><body><main>
+<header><h1>PRECENTOR</h1><span class="sub">twenty-eight choirs, one room</span></header>
+<div class="panel">
+<div class="trad" id="trad"></div><p id="cap"></p>
+<div class="keys" id="keys"></div>
+<div class="ctl">
+<div class="row" data-tip="BLEND WITH: the second choir for the morph. The choir you pick above stays as the first."><label for="mb">Blend with</label><select id="mb"></select></div>
+<div class="row" data-tip="MORPH: crossfades the selected choir into the second one. Tuning, vibrato, brightness and the voice stacks all blend, so the middle is a hybrid that belongs to neither tradition. Applies to new notes."><label for="morph">Morph</label><div><input id="morph" type="range" min="0" max="1" step=".002" value="0"><div class="scale"><span id="ma"></span><span id="mbn"></span></div></div></div>
+<div class="row" data-tip="STONE: the size of the room. Low is a small chapel with a short tail; high is a cathedral with a ten-second decay. Rebuilds when you let go."><label for="stone">Stone</label><div><input id="stone" type="range" min="0" max="1" step=".002" value=".6"><div class="scale"><span>chapel</span><span>cathedral</span></div></div></div>
+<div class="row" data-tip="BREATH: how late and how scattered the congregation enters behind the lead. Low is a unison attack; high is a loose, ragged arrival."><label for="breath">Breath</label><div><input id="breath" type="range" min="0" max="1" step=".002" value=".5"><div class="scale"><span>unison</span><span>scattered</span></div></div></div>
+<div class="row" data-tip="RANGE: pulls every voice towards one vocal range. Left is bass and basso profundo, centre is the full choir, right is alto and soprano. Applies to new notes."><label for="range">Range</label><div><input id="range" type="range" min="0" max="1" step=".002" value=".5"><div class="scale"><span>bass</span><span>tenor</span><span>all</span><span>alto</span><span>soprano</span></div></div></div>
+<div class="row" data-tip="VOWEL: the mouth shape of every voice, from oo through ah to eh. Changes notes that are already sounding."><label for="vowel">Vowel</label><div><input id="vowel" type="range" min="0" max="1" step=".002" value=".2"><div class="scale"><span>oo</span><span>ah</span><span>eh</span></div></div></div>
+</div>
+<div class="sw"><button id="drone" aria-pressed="false" data-tip="ISON: the held drone beneath Orthodox and Byzantine chant. A low root and fifth sustain while the choir moves above, and it retunes with each choir."><i></i>Ison</button><button id="rec" aria-pressed="false" data-tip="RECORD: captures what you hear as a stereo WAV. Press again to stop and save. This web page can only save zip files, so the WAV arrives zipped; the desktop app saves a plain WAV."><i></i><span id="rt">Record</span></button><button id="drift" aria-pressed="false" data-tip="DRIFT: the choir plays itself. Every few seconds a degree is chosen at random, held, then released into the room. Switch on Sync instead to follow MIDI clock."><i></i>Drift</button></div>
+<details class="midi" id="loops"><summary>Loops <span id="ms">sync off</span></summary>
+<div class="row" data-tip="CLOCK: follow a MIDI clock from your DAW or hardware, or run the loops from the built-in tempo."><label for="clk">Clock</label><select id="clk"><option value="int">Internal</option><option value="midi">MIDI clock</option></select></div>
+<div class="row" data-tip="TEMPO: speed of the internal clock in beats per minute. Ignored while following MIDI."><label for="bpm">Tempo</label><input id="bpm" type="number" min="40" max="220" value="100"></div>
+<div class="row" data-tip="STEP: how often the three loops get a turn, counted from MIDI clock. One bar at 120 BPM is two seconds."><label for="step">Step</label><select id="step"><option value="24">1 beat</option><option value="48">2 beats</option><option value="96" selected>1 bar</option><option value="192">2 bars</option></select></div>
+<div class="row" data-tip="LOOPS: how many steps each of the three loops lasts. Lengths with no common factor, like 3, 5 and 7, take longest to repeat. Try 5, 8 and 13."><label>Loops</label><div class="tri"><select id="l0"></select><select id="l1"></select><select id="l2"></select></div></div>
+<div class="row" data-tip="MODULATE: every so many steps the tonic moves by a fifth, fourth or step, folded to stay near home. Held notes keep the old key; the ison retunes."><label for="mod">Modulate</label><select id="mod"><option value="0">Off</option><option value="16">Every 16 steps</option><option value="32">Every 32 steps</option><option value="64">Every 64 steps</option><option value="128">Every 128 steps</option></select></div>
+<div class="row" data-tip="DENSITY: how likely a loop is to sing when its turn comes. Low is sparse; high is nearly continuous."><label for="dens">Density</label><div><input id="dens" type="range" min=".1" max="1" step=".002" value=".7"><div class="scale"><span>sparse</span><span>full</span></div></div></div>
+<div class="row" data-tip="SEED: the number behind every random choice the loops make. The same seed and settings replay the same run. The grain of individual voices still varies."><label for="seed">Seed</label><div class="tri"><input id="seed" type="number" min="0" max="999999" value="1"><button id="dice" class="mini">New</button></div></div>
+<div class="row" data-tip="RECALL CODE: every setting of this run in one string. Copy it to keep a good run; paste one here and press Enter to return to it."><label for="code">Code</label><input id="code" type="text" spellcheck="false"></div>
+<div class="sw m"><button id="sync" aria-pressed="false" data-tip="SYNC: follow incoming MIDI clock. Three loops of 3, 5 and 7 steps fall in and out of phase, so the pattern rarely repeats."><i></i>Sync</button></div>
+</details>
+<details class="midi" id="midi"><summary>MIDI <span id="mst">off</span></summary>
+<div class="row" data-tip="MIDI IN: which device to listen to. Clock drives Sync; notes sing degrees; CC1, CC2, CC3 and CC91 set vowel, breath, morph and stone."><label for="min">MIDI in</label><select id="min"><option value="all">All inputs</option></select></div>
+</details>
+</div>
+<p class="note">Hold a key, or A–J. With Sync on, three loops of 3, 5 and 7 steps follow your MIDI clock and drift in and out of phase. CC1 vowel, CC2 breath, CC3 morph, CC91 stone; program change picks the choir.</p>
+</main>
+<script>
+// choirs.js: the data. Each choir is a recipe for the engine (see ENGINE.md).
+const dg=j=>E.T*E.R[j%7]*(j>=7?2:1);
+const TR=[
+{n:'Gregorian',d:'Plainchant: one line, men in unison, an almost vibrato-free voice dissolving into a vast stone room.',T:146.83,R:[1,9/8,6/5,4/3,3/2,5/3,9/5],vib:0.0008,vr:5,q:0.9,gl:20,vow:0.15,br:0.35,st:1,
+ v:(i,f)=>[[f,.9],[f,.85],[f*.5,.5]]},
+{n:'English',d:'Cathedral polyphony: pure-intonation counterpoint, trebles over adult voices, a long clear Anglican nave.',T:220,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:0.004,vr:5,q:0.8,gl:15,vow:0.35,br:0.12,st:0.9,
+ v:(i,f)=>[[f,.9],[dg(i+2),.7],[dg(i+4)*.5,.7],[f*.5,.8],[f*2,.55],[dg(i+2)*2,.4]]},
+{n:'Gaelic',d:'Lined-out psalm. A precentor leads; the room answers late, loose, swooping into pitch.',T:146.83,R:[1,9/8,6/5,4/3,3/2,5/3,16/9],vib:.006,vr:5,q:1,gl:60,vow:.2,br:.5,st:.6,
+ v:(i,f)=>{const a=[[f,.8],[f,.8],[f*2,.45],[f*.5,.9],[f*.5,.9],[f*1.5,.3],[f*.25,.6]];if(Math.random()<.6)a.push([dg(i+2),.4]);return a}},
+{n:'Welsh',d:'Chapel hymn: four-part triads in tune and in time, warm round vowels, a full stone house.',T:130.81,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:.004,vr:5.2,q:.9,gl:20,vow:.3,br:.15,st:.75,
+ v:(i,f)=>[[f,.9],[dg(i+2),.8],[dg(i+4),.7],[f*.5,.9],[dg(i+4)*.5,.6],[f*2,.4]]},
+{n:'Breton',d:'Kan ha diskan: call and answer, the second voice overlapping the first so the line never stops.',T:164,R:[1,9/8,5/4,4/3,3/2,5/3,16/9],vib:0.001,vr:5,q:1.7,gl:25,vow:0.55,br:0.55,st:0.25,
+ v:(i,f)=>[[f,.9],[f,.85],[f*.5,.4]]},
+{n:'Icelandic',d:'Tvisongur: medieval organum in parallel fifths and fourths, austere, open and cold.',T:130,R:[1,9/8,6/5,4/3,3/2,5/3,9/5],vib:0.0012,vr:5,q:1,gl:15,vow:0.2,br:0.2,st:0.85,
+ v:(i,f)=>[[f,.9],[f*1.5,.9],[f*.75,.6],[f*2,.3]]},
+{n:'Faroese',d:'Kvaedi: a dancing chain sings a ballad in unison, a steady refrain answered by the whole group.',T:146.83,R:[1,9/8,6/5,4/3,3/2,5/3,9/5],vib:0.001,vr:5,q:1.2,gl:20,vow:0.35,br:0.25,st:0.4,
+ v:(i,f)=>[[f,.9],[f,.8],[f*.5,.6],[f*1.5,.35]]},
+{n:'Corsican',d:'Paghjella: three men, close and nasal. A bassu, a secunda and a high terza ornamenting above, in a church.',T:116.54,R:[1,9/8,6/5,4/3,3/2,8/5,9/5],vib:.005,vr:5.3,q:1.5,gl:45,vow:.45,br:.1,st:.8,
+ v:(i,f)=>[[f,.9],[dg(i+2),.85,{gl:90}],[f*.5,.9],[f*.5,.6],[dg(i+4)*.5,.3]]},
+{n:'Sardinian',d:'Cantu a tenore: four men locked in fifths and octaves, a rough straight bass, a faint overtone above.',T:98,R:[1,9/8,5/4,4/3,3/2,5/3,16/9],vib:.0015,vr:5,q:2,gl:15,vow:.2,br:.05,st:.6,
+ v:(i,f)=>[[f,.9],[f*.5,.9],[f*.25,1],[f*.75,.7],[f*2,.4],[E.T*4,.2,{t:'sine',vib:.001}]]},
+{n:'Genoese',d:'Trallalero: layered male polyphony, a deep stacked bass beneath a piercing high voice.',T:110,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:0.006,vr:5,q:1.4,gl:50,vow:0.5,br:0.3,st:0.5,
+ v:(i,f)=>[[f,.9],[f,.5],[dg(i+2),.7],[f*.5,.9],[f*.25,.8],[f*2,.5,{vib:.01,vr:6}]]},
+{n:'Dalmatian',d:'Klapa and ojkanje: close four-part male harmony, with a shaking, throat-ornamented high voice.',T:143,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:0.005,vr:6,q:1.3,gl:35,vow:0.4,br:0.15,st:0.45,
+ v:(i,f)=>[[f,.9],[dg(i+2),.85],[f*.5,.9],[dg(i+4)*.5,.6],[f*2,.3,{vib:.012,vr:7.5}]]},
+{n:'Alentejo',d:'Cante: slow men in broad parallel thirds and sixths, unhurried, the chorus following two solo voices.',T:103.83,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:0.005,vr:5,q:1.1,gl:40,vow:0.35,br:0.3,st:0.6,
+ v:(i,f)=>[[f,.9],[dg(i+2),.85],[f*.5,.9],[dg(i+4)*.5,.5]]},
+{n:'Ladino',d:'Sephardic romance: a Hijaz-coloured line, intimate and ornamented, in a small courtyard room.',T:138.59,R:[1,16/15,5/4,4/3,3/2,8/5,16/9],vib:.008,vr:5.5,q:1,gl:90,vow:.35,br:.5,st:.25,
+ v:(i,f)=>[[f,.8,{gl:110}],[f*2,.3,{gl:150,vib:.011}],[f*.5,.6],[E.T*.5,.35],[dg(i+1),.2]]},
+{n:'Swiss',d:'Alpine yodel choir: parallel thirds, with high voices flipping up into falsetto from far below.',T:196,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:0.003,vr:5,q:1.2,gl:80,vow:0.55,br:0.3,st:0.35,
+ v:(i,f)=>[[f,.8],[dg(i+2),.7],[f*2,.55,{gl:500}],[f*.5,.7],[dg(i+4)*2,.4,{gl:600}]]},
+{n:'Orthodox',d:'Slavic liturgical choir: dark four-part chant with an oktavist an octave below the bass, in a cathedral.',T:196,R:[1,9/8,6/5,4/3,3/2,5/3,9/5],vib:.004,vr:5,q:.9,gl:25,vow:.15,br:.2,st:.9,
+ v:(i,f)=>[[f,.8],[dg(i+2),.6],[dg(i+4),.6],[f*.5,.9],[f*.25,1,{vib:.0015}],[f*2,.25]]},
+{n:'Ukrainian',d:'White voice: open, bright, little vibrato. Parallel triads across a wide field.',T:196,R:[1,9/8,5/4,4/3,3/2,5/3,16/9],vib:.002,vr:5,q:1.35,gl:30,vow:.55,br:.25,st:.35,
+ v:(i,f)=>[[f,.9],[dg(i+2),.8],[dg(i+4),.5],[f*2,.45],[f*.5,.6]]},
+{n:'Belarus',d:'Polesie ritual song: archaic parallel fifths, strident open voices, narrow-range chant in the cold.',T:155.56,R:[1,9/8,6/5,4/3,3/2,5/3,9/5],vib:.001,vr:5,q:1.7,gl:35,vow:.65,br:.3,st:.3,
+ v:(i,f)=>[[f,.9],[f,.7],[f*1.5,.75],[f*2,.5],[f*.5,.6],[f*.75,.4]]},
+{n:'N. Polish',d:'Kurpie and Podlasie: raised Lydian fourth, parallel thirds, voices thrown outdoors.',T:164.81,R:[1,9/8,5/4,45/32,3/2,5/3,15/8],vib:.001,vr:5,q:1.5,gl:25,vow:.75,br:.15,st:.3,
+ v:(i,f)=>[[f,.8],[dg(i+2),.85],[dg(i+5)*.5,.6],[f*2,.5]]},
+{n:'S. Russian',d:'Podgoloski: every singer improvises a variant of the tune, a bright scattered heterophony.',T:233,R:[1,9/8,6/5,4/3,3/2,5/3,9/5],vib:0.002,vr:5,q:1.4,gl:80,vow:0.6,br:0.85,st:0.35,
+ v:(i,f)=>[[f,.8],[f,.8],[f,.7],[dg(i+1),.4],[dg(i+2),.4],[f*.5,.5]]},
+{n:'Seto',d:'Leelo: a leader sings, the chorus echoes late in a bright, straight, drone-like heterophony outdoors.',T:220,R:[1,9/8,5/4,4/3,3/2,5/3,16/9],vib:0.001,vr:5,q:1.5,gl:30,vow:0.6,br:0.6,st:0.3,
+ v:(i,f)=>[[f,.8],[f,.8],[f,.7],[f*.5,.5],[f*1.5,.3],[E.T,.5]]},
+{n:'Lithuania',d:'Sutartines: interlocking canons on clashing seconds, women in two or three parts, straight and hard.',T:246.94,R:[1,9/8,5/4,4/3,3/2,5/3,15/8],vib:0.0005,vr:5,q:1.4,gl:15,vow:0.5,br:0.45,st:0.35,
+ v:(i,f)=>[[dg(i+1),.9],[f,.7],[dg(i+1),.6],[f*.5,.4]]},
+{n:'Albanian',d:'Iso polyphony: a sustained drone beneath rawer, interweaving melodic lines.',T:147,R:[1,10/9,6/5,4/3,3/2,5/3,9/5],vib:0.003,vr:5.5,q:1.6,gl:40,vow:0.5,br:0.4,st:0.4,
+ v:(i,f)=>[[f,.9],[dg(i+1),.6],[E.T*.5,.9],[E.T*.5,.7],[f*2,.35]]},
+{n:'Bulgarian',d:'Open-throat. A neighbouring second rubs against the lead; fast ornament, no apology.',T:185,R:[1,16/15,5/4,4/3,3/2,8/5,7/4],vib:.006,vr:6,q:1.1,gl:50,vow:.45,br:.2,st:.5,
+ v:(i,f)=>[[f,.8],[dg(i+1),.85],[dg(i+1)*2,.3],[f*.5,.7],[E.T*.5,.4]]},
+{n:'Romanian',d:'Byzantine ison beneath a doina-like line: long portamento, neutral seconds.',T:130.81,R:[1,12/11,5/4,4/3,3/2,18/11,15/8],vib:.005,vr:5,q:1.1,gl:130,vow:.3,br:.45,st:.8,
+ v:(i,f)=>[[f,.7],[f*.5,.9],[f*.25,.7],[f*.75,.4],[dg(i+1)*.5,.3]]},
+{n:'Georgian',d:'Three-part polyphony. Crunching seconds, a rooted bass, and a yodelling high voice.',T:123.47,R:[1,9/8,5/4,4/3,3/2,5/3,16/9],vib:.003,vr:5.5,q:1.8,gl:40,vow:.6,br:.1,st:.4,
+ v:(i,f)=>[[dg(i+1),.8],[E.T*.5,1],[E.T*.25,.9],[f*2,.5,{vib:.012,vr:7.5}]]},
+{n:'Kazakh',d:'Dombra song: pentatonic, open fifths, a deep root. The string carries it, not the throat.',T:110,R:[1,9/8,4/3,3/2,16/9,2,9/4],vib:.003,vr:5,q:1,gl:40,vow:.1,br:.35,st:.55,
+ v:(i,f)=>[[E.T*.5,.9],[E.T*.25,.7],[f*1.5,.35],[f*2,.3]]},
+{n:'Tatar',d:'Long-song melisma on a major pentatonic. Slow, ornamented glides, a nasal brightness, no hurry.',T:174.61,R:[1,9/8,5/4,3/2,5/3,2,9/4],vib:.007,vr:5.5,q:1.25,gl:160,vow:.4,br:.4,st:.5,
+ v:(i,f)=>[[f,.8,{gl:230}],[f*2,.4,{gl:140}],[f*.5,.75],[dg(i+1),.3],[E.T*.5,.4]]},
+{n:'Romani',d:'Romani voice: chest-heavy, wide vibrato, long slides through a raised fourth and augmented seconds.',T:207.65,R:[1,9/8,6/5,45/32,3/2,8/5,15/8],vib:.007,vr:5.8,q:1.3,gl:140,vow:.5,br:.35,st:.45,
+ v:(i,f)=>[[f,.9,{gl:180,vib:.011,vr:6.2}],[f*2,.45,{gl:120,vib:.012,vr:6.8}],[f*.5,.7],[dg(i+3),.3],[f*1.5,.3]]}
+];
+const NAMES={"Gregorian": "Gregorian chant (plainchant)", "English": "English cathedral polyphony, Tudor style", "Gaelic": "Hebridean Gaelic psalmody, lined out", "Welsh": "Welsh chapel hymn singing (cymanfa ganu)", "Breton": "Breton kan ha diskan", "Icelandic": "Icelandic tvísöngur", "Faroese": "Faroese kvæði chain-dance ballad", "Corsican": "Corsican paghjella", "Sardinian": "Sardinian cantu a tenore", "Genoese": "Genoese trallalero", "Dalmatian": "Dalmatian klapa and ojkanje", "Alentejo": "Alentejo cante, Portugal", "Ladino": "Judeo-Spanish (Sephardic) romansa", "Swiss": "Swiss Alpine yodel choir", "Orthodox": "Slavic Orthodox liturgical choir, with oktavist", "Ukrainian": "Ukrainian white-voice village song (bilyi holos)", "Belarus": "Belarusian Polesie calendar song (kalyadki)", "N. Polish": "Kurpie and Podlasie village song (biały śpiew)", "S. Russian": "Southern Russian village song (podgoloski)", "Seto": "Seto leelo, south-east Estonia", "Lithuania": "Lithuanian sutartinės", "Albanian": "Albanian and Epirote iso polyphony", "Bulgarian": "Bulgarian Shopluk polyphony", "Romanian": "Romanian Byzantine chant and doină", "Georgian": "Georgian polyphony (krimanchuli)", "Kazakh": "Kazakh dombra song", "Tatar": "Tatar long song (ozyn köy)", "Romani": "Romani song"};
+
+// engine.js: synthesis engine. Tuning, morph, formant voices, room, voice allocation.
+const S={stone:.6,breath:.5,vowel:.2,u:0};
+const V=[[300,870,2240],[570,840,2410],[730,1090,2440],[530,1840,2480]];
+let P=TR[0],PB=TR.find(t=>t.n==='Georgian'),MX=0,TS=1,E,ctx,bus,dry,wet,conv,master,outN;const live=new Set(),held={};
+function recalc(){const m=MX,B=PB,L=k=>P[k]*(1-m)+B[k]*m;
+ E={T:Math.pow(P.T,1-m)*Math.pow(B.T,m)*TS,R:P.R.map((r,i)=>Math.pow(r,1-m)*Math.pow(B.R[i],m)),vib:L('vib'),vr:L('vr'),q:L('q'),gl:L('gl')}}
+recalc();
+const fm=v=>{const p=v*3,i=Math.min(2,p|0),f=p-i;return V[i].map((x,k)=>x+(V[i+1][k]-x)*f)};
+function init(){
+ if(ctx){ctx.resume();return}
+ ctx=new(window.AudioContext||window.webkitAudioContext)();
+ master=ctx.createGain();master.gain.value=.9;
+ const c=ctx.createDynamicsCompressor();master.connect(c);c.connect(ctx.destination);outN=c;
+ bus=ctx.createGain();dry=ctx.createGain();wet=ctx.createGain();conv=ctx.createConvolver();
+ bus.connect(dry);bus.connect(conv);conv.connect(wet);dry.connect(master);wet.connect(master);
+ buildIR();mix();
+}
+function mix(){if(!ctx)return;dry.gain.value=.55;wet.gain.value=.5+S.stone*.9}
+function buildIR(){
+ const t=1.5+S.stone*8,n=ctx.sampleRate*t|0,b=ctx.createBuffer(2,n,ctx.sampleRate),pre=ctx.sampleRate*.04|0;
+ for(let c=0;c<2;c++){const d=b.getChannelData(c);let lp=0;
+  for(let i=pre;i<n;i++){const x=(i-pre)/(n-pre);lp+=((Math.random()*2-1)-lp)*(.55-.5*x);d[i]=lp*Math.pow(1-x,3.6)*2.2}}
+ conv.buffer=b;
+}
+function voice(freq,delay,level,o={}){
+ freq*=Math.pow(2,(Math.random()-.5)*8/1200);
+ if(o.t!=='sine'&&!o.res&&S.u){const k=Math.pow(Math.abs(S.u),1.5),Fc=200*Math.pow(2,2*S.u);freq*=Math.pow(2,Math.round(k*Math.log2(Fc/freq)))}
+ const t=ctx.currentTime+delay,sine=o.t==='sine',s=ctx.createOscillator();s.type=sine?'sine':'sawtooth';
+ const c=x=>freq*Math.pow(2,x/1200),gl=sine?15:(o.gl??E.gl);
+ s.frequency.setValueAtTime(c(-(gl*.5+Math.random()*gl)),t);
+ s.frequency.exponentialRampToValueAtTime(c((Math.random()-.5)*16),t+.4+Math.random()*.7);
+ const l=ctx.createOscillator();l.frequency.value=(o.vr??E.vr)*(.8+Math.random()*.45);
+ const ld=ctx.createGain(),vd=freq*(o.vib??E.vib);ld.gain.setValueAtTime(0,t);ld.gain.linearRampToValueAtTime(vd,t+1.8+Math.random());l.connect(ld);ld.connect(s.frequency);
+ const w=ctx.createOscillator();w.frequency.value=.12+Math.random()*.35;const wg=ctx.createGain();wg.gain.value=freq*.0045;w.connect(wg);wg.connect(s.frequency);
+ const r=ctx.createOscillator();r.frequency.value=.2+Math.random()*.5;const rg=ctx.createGain();rg.gain.value=.9;r.connect(rg);rg.connect(l.frequency);
+ const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(level*(sine?.35:.55),t+1.2+Math.random());
+ const p=ctx.createStereoPanner();p.pan.value=Math.random()*1.6-.8;
+ const sc=Math.min(1.7,Math.max(.6,Math.pow(freq/160,.3)));
+ const fs=(sine||o.res)?[]:[0,1,2].map(k=>{const f=ctx.createBiquadFilter();f.type='bandpass';f.Q.value=[7,9,11][k]*E.q;
+  const m=ctx.createGain();m.gain.value=[3,2,1][k];s.connect(f);f.connect(m);m.connect(g);return f});
+ if(o.res){const f=ctx.createBiquadFilter();f.type='bandpass';f.Q.value=o.Q||30;
+  f.frequency.setValueAtTime(o.res*(1+(Math.random()-.5)*.06),t);f.frequency.setTargetAtTime(o.res,t,.12);
+  const m=ctx.createGain();m.gain.value=o.gain||10;s.connect(f);f.connect(m);m.connect(g)}
+ if(sine)s.connect(g);
+ const v={set(){fm(S.vowel).forEach((x,k)=>fs[k]&&fs[k].frequency.setTargetAtTime(x*sc,ctx.currentTime,.12))},
+  stop(){const n=ctx.currentTime;g.gain.cancelScheduledValues(n);g.gain.setValueAtTime(g.gain.value,n);g.gain.setTargetAtTime(0,n,1.1);s.stop(n+7);l.stop(n+7);w.stop(n+7);r.stop(n+7);live.delete(v)}};
+ fm(S.vowel).forEach((x,k)=>fs[k]&&(fs[k].frequency.value=x*sc));
+ g.connect(p);p.connect(bus);s.start(t);l.start(t);w.start(t);r.start(t);live.add(v);return v;
+}
+const els=[];
+function press(i,key){
+ init();key=key??i;if(held[key])return;
+ const f=E.T*E.R[i],sp=S.breath*1.8,vs=[voice(f,0,1)],th=MX*Math.PI/2;
+ [[P,Math.cos(th)],[PB,Math.sin(th)]].forEach(([C,w])=>{if(w<.05)return;
+  C.v(i,f).forEach(([fr,l,o])=>{if(l*w>=.06)vs.push(voice(fr,.4+Math.random()*sp,l*w,o))})});
+ vs.deg=i;held[key]=vs;els[i].classList.add('on');
+}
+function release(i,key){key=key??i;if(!held[key])return;held[key].forEach(v=>v.stop());delete held[key];
+ if(!Object.values(held).some(v=>v.deg===i))els[i].classList.remove('on')}
+
+// app.js: interface, MIDI, sync loops, seed and recall, recording.
+const KEYS='asdfghj';
+const kb=document.getElementById('keys');
+P.R.forEach((_,i)=>{const b=document.createElement('button');b.className='key';b.textContent=i+1;b.dataset.tip='Degree '+(i+1)+': hold to sing\nKeyboard: '+KEYS[i].toUpperCase();b.setAttribute('aria-label','Degree '+(i+1));
+ b.onpointerdown=e=>{b.setPointerCapture(e.pointerId);press(i)};
+ ['pointerup','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>release(i)));
+ kb.appendChild(b);els.push(b)});
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const i=KEYS.indexOf(e.key);if(i>=0&&!e.repeat)press(i)});
+addEventListener('keyup',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const i=KEYS.indexOf(e.key);if(i>=0)release(i)});
+const $=id=>document.getElementById(id);
+$('stone').oninput=e=>{S.stone=+e.target.value;mix()};
+$('stone').onchange=()=>{if(ctx)buildIR()};
+$('breath').oninput=e=>S.breath=+e.target.value;
+$('range').oninput=e=>{let x=+e.target.value;if(Math.abs(x-.5)<.04)x=.5;S.u=2*x-1};
+$('vowel').oninput=e=>{S.vowel=+e.target.value;live.forEach(v=>v.set())};
+let ison=null;
+function setIson(on){if(ison){ison.forEach(v=>v.stop());ison=null}
+ if(on)ison=[voice(E.T/2,0,.9),voice(E.T/2,1,.8),voice(E.T/4,.5,.6),voice(E.T*.75,2,.35)]}
+$('drone').onclick=e=>{init();const b=e.currentTarget,on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);setIson(on)};
+let drifting=false;
+function drift(){if(!drifting)return;const i=Math.random()*7|0,k='d'+i;press(i,k);
+ setTimeout(()=>release(i,k),5000+Math.random()*7000);setTimeout(drift,4500+Math.random()*6000)}
+$('drift').onclick=e=>{init();if(!drifting&&MS.follow)$('sync').click();const b=e.currentTarget;drifting=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',drifting);if(drifting)drift()};
+const tb=[];
+function choose(n){
+ Object.keys(held).forEach(k=>{held[k].forEach(v=>v.stop());delete held[k]});els.forEach(e=>e.classList.remove('on'));
+ MS.loops.forEach(L=>L.cur=null);P=TR[n];recalc();upd();codeUpd();S.vowel=P.vow;S.breath=P.br;S.stone=P.st;
+ $('vowel').value=P.vow;$('breath').value=P.br;$('stone').value=P.st;
+ tb.forEach((b,j)=>b.setAttribute('aria-pressed',j===n));$('cap').textContent=P.d;
+ if(ctx){buildIR();mix()}
+ if(ison)setIson(true);
+}
+TR.forEach((t,n)=>{const b=document.createElement('button');b.className='t';b.textContent=t.n;b.dataset.tip=(NAMES[t.n]||t.n)+'\n'+t.d+'\nTonic '+Math.round(t.T)+' Hz';b.onclick=()=>choose(n);$('trad').appendChild(b);tb.push(b)});
+
+const MS={follow:false,stopped:false,tk:0,step:-1,stepT:96,dens:.7,modEvery:0,ibpm:100,src:'int',last:0,l24:0,bpm:0,
+ loops:[{len:3,d:0,cur:null,rel:0,k:'L0'},{len:5,d:4,cur:null,rel:0,k:'L1'},{len:7,d:2,cur:null,rel:0,k:'L2'}]};
+let mi=null,tm;
+const ms=t=>$('ms').textContent=t,mst=t=>$('mst').textContent=t,mfail=t=>{mst(t);if(MS.follow&&MS.src==='midi')ms(t)};
+function stopLoops(){MS.loops.forEach(L=>{if(L.cur!=null){release(L.cur,L.k);L.cur=null}})}
+function stepFire(){
+ MS.step++;
+ if(MS.modEvery&&MS.step>0&&MS.step%MS.modEvery===0)modulate();
+ MS.loops.forEach(L=>{
+  if(L.cur!=null&&MS.step>=L.rel){release(L.cur,L.k);L.cur=null}
+  if(MS.step%L.len===0&&rng()<MS.dens){
+   if(L.cur!=null){release(L.cur,L.k);L.cur=null}
+   L.d=((L.d+[-3,-2,-1,-1,1,1,2,3][rng()*8|0])%7+7)%7;
+   press(L.d,L.k);L.cur=L.d;L.rel=MS.step+Math.max(1,Math.round(L.len*(.5+rng()*.5)));
+  }});
+}
+function tick(ts){
+ if(!MS.follow||MS.stopped||!ctx)return;
+ MS.last=performance.now();
+ if(MS.tk%24===0){if(MS.l24){const b=60000/(ts-MS.l24);MS.bpm=MS.bpm?MS.bpm*.7+b*.3:b;ms(MS.bpm.toFixed(1)+' bpm · '+Math.round(E.T)+' Hz')}MS.l24=ts}
+ if(MS.tk%MS.stepT===0)stepFire();
+ MS.tk++;
+}
+function setCtl(id,v){const el=$(id);el.value=v;el.dispatchEvent(new Event('input'));
+ if(id==='stone'){clearTimeout(tm);tm=setTimeout(()=>el.dispatchEvent(new Event('change')),400)}}
+function onmsg(e){
+ const d=e.data,s=d[0];
+ if(MS.src==='int'&&s>=0xF8&&s<=0xFC)return;
+ if(s===0xF8)return tick(e.timeStamp);
+ if(s===0xFA){resetRun();MS.stopped=false;return}
+ if(s===0xFB){MS.stopped=false;return}
+ if(s===0xFC){MS.stopped=true;stopLoops();if(MS.follow)ms('stopped');return}
+ const c=s&240,deg=((d[1]-36)%7+7)%7;
+ if(c===144&&d[2]>0){init();press(deg,'n'+d[1])}
+ else if(c===128||c===144)release(deg,'n'+d[1]);
+ else if(c===176){const v=d[2]/127;if(d[1]===1)setCtl('vowel',v);else if(d[1]===2)setCtl('breath',v);else if(d[1]===91)setCtl('stone',v);else if(d[1]===3)setCtl('morph',v)}
+ else if(c===192&&d[1]<TR.length)choose(d[1]);
+}
+function attach(){if(!mi)return;const v=$('min').value;mi.inputs.forEach(i=>{i.onmidimessage=(v==='all'||v===i.id)?onmsg:null})}
+function listIns(){
+ const sel=$('min'),cur=sel.value;sel.innerHTML='<option value="all">All inputs</option>';
+ mi.inputs.forEach(i=>{const o=document.createElement('option');o.value=i.id;o.textContent=i.name;sel.appendChild(o)});
+ sel.value=[...sel.options].some(o=>o.value===cur)?cur:'all';attach();
+ mst(mi.inputs.size+(mi.inputs.size===1?' input':' inputs'));if(MS.follow&&MS.src==='midi')ms(mi.inputs.size?'waiting for clock':'no MIDI inputs found');
+}
+async function midiInit(){
+ if(!navigator.requestMIDIAccess){mfail('not supported here');return}
+ try{mi=await navigator.requestMIDIAccess();mi.onstatechange=listIns;listIns()}
+ catch(err){mfail('blocked, allow access')}
+}
+$('min').onchange=attach;
+$('step').onchange=e=>MS.stepT=+e.target.value;
+$('dens').oninput=e=>MS.dens=+e.target.value;
+$('sync').onclick=async e=>{
+ const b=e.currentTarget,on=b.getAttribute('aria-pressed')!=='true';
+ b.setAttribute('aria-pressed',on);MS.follow=on;
+ if(on){init();if(drifting)$('drift').click();resetRun();if(MS.src==='int'){MS.stopped=false;startInt();ms('internal clock')}else{ms('waiting for clock');if(!mi)await midiInit();else listIns()}}
+ else{stopInt();stopLoops();ms('sync off')}
+};
+setInterval(()=>{if(MS.follow&&!MS.stopped&&MS.last&&performance.now()-MS.last>1500){MS.last=0;MS.l24=0;ms('waiting for clock')}},500);
+function upd(){$('ma').textContent=P.n;$('mbn').textContent=PB.n}
+TR.forEach((t,n)=>{const o=document.createElement('option');o.value=n;o.textContent=NAMES[t.n]||t.n;$('mb').appendChild(o)});
+$('mb').value=TR.indexOf(PB);
+$('mb').onchange=e=>{PB=TR[+e.target.value];recalc();upd()};
+$('morph').oninput=e=>{MX=+e.target.value;recalc()};
+$('morph').onchange=()=>{if(ison)setIson(true)};
+
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let seed=1,rng=mulberry(1);
+function resetRun(){stopLoops();MS.loops.forEach((L,i)=>{L.d=[0,4,2][i];L.rel=0});MS.tk=0;MS.step=-1;MS.l24=0;TS=1;rng=mulberry(seed);recalc();if(ison)setIson(true);codeUpd()}
+function modulate(){const r=[3/2,2/3,4/3,3/4,9/8,8/9][rng()*6|0];TS*=r;while(TS>=1.4142)TS/=2;while(TS<.7071)TS*=2;recalc();if(ison)setIson(true)}
+let ik=null,vt=0,ilast=0,iacc=0;
+function startInt(){stopInt();ilast=performance.now();iacc=0;vt=0;ik=setInterval(()=>{const n=performance.now(),per=2500/MS.ibpm;iacc+=n-ilast;ilast=n;let k=0;while(iacc>=per&&k++<8){iacc-=per;vt+=per;tick(vt)}},8)}
+function stopInt(){clearInterval(ik);ik=null}
+function codeGet(){return[seed,MS.loops[0].len,MS.loops[1].len,MS.loops[2].len,MS.stepT/24,Math.round(MS.dens*100),MS.modEvery,TR.indexOf(P),TR.indexOf(PB),Math.round(MX*100),MS.ibpm].join('.')}
+function codeUpd(){$('code').value=codeGet()}
+function codeSet(str){const a=str.trim().split('.').map(Number);if(a.length<11||a.some(isNaN)||!TR[a[7]]||!TR[a[8]])return false;
+ seed=a[0];choose(a[7]);PB=TR[a[8]];MX=a[9]/100;MS.loops.forEach((L,i)=>{L.len=a[1+i];$('l'+i).value=L.len});
+ MS.stepT=a[4]*24;MS.dens=a[5]/100;MS.modEvery=a[6];MS.ibpm=a[10];
+ $('step').value=MS.stepT;$('dens').value=MS.dens;$('mod').value=MS.modEvery;$('bpm').value=MS.ibpm;$('seed').value=seed;$('mb').value=a[8];$('morph').value=MX;
+ recalc();upd();resetRun();return true}
+MS.loops.forEach((L,i)=>{const sel=$('l'+i);for(let n=2;n<=21;n++){const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o)}sel.value=L.len;sel.onchange=e=>L.len=+e.target.value});
+$('clk').onchange=e=>{MS.src=e.target.value;if(MS.follow){if(MS.src==='int'){resetRun();MS.stopped=false;startInt();ms('internal clock')}else{stopInt();stopLoops();ms('waiting for clock')}}};
+$('bpm').onchange=e=>MS.ibpm=Math.max(40,Math.min(220,+e.target.value||100));
+$('mod').onchange=e=>MS.modEvery=+e.target.value;
+$('seed').onchange=e=>{seed=Math.max(0,Math.min(999999,+e.target.value|0));resetRun()};
+$('dice').onclick=()=>{seed=Math.random()*1e6|0;$('seed').value=seed;resetRun()};
+$('code').onchange=e=>{if(!codeSet(e.target.value))codeUpd()};
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.id!=='code')codeUpd()}));
+$('midi').addEventListener('toggle',()=>{if($('midi').open&&!mi)midiInit()});
+let rec=null;
+function recStart(){const sp=ctx.createScriptProcessor(4096,2,2),ch=[[],[]];
+ sp.onaudioprocess=e=>{for(let c=0;c<2;c++)ch[c].push(new Float32Array(e.inputBuffer.getChannelData(c)))};
+ outN.connect(sp);sp.connect(ctx.destination);rec={sp,ch,t0:performance.now()}}
+function wavOf(ch,sr){let n=0;ch[0].forEach(b=>n+=b.length);const v=new DataView(new ArrayBuffer(44+n*4)),w=(o,t)=>[...t].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+ w(0,'RIFF');v.setUint32(4,36+n*4,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*4,true);
+ let o=44;const q=x=>{x=Math.max(-1,Math.min(1,x));return x<0?x*32768:x*32767};
+ for(let k=0;k<ch[0].length;k++){const a=ch[0][k],b=ch[1][k];for(let i=0;i<a.length;i++){v.setInt16(o,q(a[i]),true);v.setInt16(o+2,q(b[i]),true);o+=4}}
+ return new Blob([v],{type:'audio/wav'})}
+async function zipOne(name,blob){const d=new Uint8Array(await blob.arrayBuffer()),n=new TextEncoder().encode(name),T=[];let c,crc=-1;
+ for(let i=0;i<256;i++){c=i;for(let k=0;k<8;k++)c=c&1?0xEDB88320^c>>>1:c>>>1;T[i]=c}
+ for(let i=0;i<d.length;i++)crc=T[(crc^d[i])&255]^crc>>>8;crc=(crc^-1)>>>0;
+ const lh=new DataView(new ArrayBuffer(30)),ch=new DataView(new ArrayBuffer(46)),eo=new DataView(new ArrayBuffer(22));
+ lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint32(14,crc,true);lh.setUint32(18,d.length,true);lh.setUint32(22,d.length,true);lh.setUint16(26,n.length,true);
+ ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint32(16,crc,true);ch.setUint32(20,d.length,true);ch.setUint32(24,d.length,true);ch.setUint16(28,n.length,true);
+ eo.setUint32(0,0x06054b50,true);eo.setUint16(8,1,true);eo.setUint16(10,1,true);eo.setUint32(12,46+n.length,true);eo.setUint32(16,30+n.length+d.length,true);
+ return new Blob([lh,n,d,ch,n,eo])}
+async function saveTake(blob,name){let dl=null;
+ try{if(window.claude&&claude.use)dl=await claude.use('downloads')}catch(e){}
+ if(dl){try{await dl.save({filename:name.replace(/\.wav$/,'.zip'),data:await zipOne(name,blob)});return 'zip'}catch(e){return e&&e.code||'failed'}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return 'wav'}
+const fmt=t=>(t/60|0)+':'+String(t%60|0).padStart(2,'0');
+$('rec').onclick=async()=>{const b=$('rec');
+ if(!rec){init();recStart();b.setAttribute('aria-pressed','true');$('rt').textContent='Stop 0:00';rec.tm=setInterval(()=>{$('rt').textContent='Stop '+fmt((performance.now()-rec.t0)/1000)},500)}
+ else{const r=rec;rec=null;clearInterval(r.tm);r.sp.onaudioprocess=null;try{outN.disconnect(r.sp)}catch(e){}r.sp.disconnect();
+  b.setAttribute('aria-pressed','false');$('rt').textContent='Record';
+  const name='precentor-'+P.n.toLowerCase().replace(/[^a-z]/g,'')+'-seed'+seed+'.wav',res=await saveTake(wavOf(r.ch,ctx.sampleRate),name);
+  $('cap').textContent=res==='wav'?'Saved '+name:res==='zip'?'Saved as a zip containing '+name:res==='declined'?'Save declined.':'Could not save the take ('+res+').';
+  setTimeout(()=>$('cap').textContent=P.d,5000)}};
+codeUpd();
+choose(TR.findIndex(t=>t.n==='Gaelic'));
+</script></body></html>
